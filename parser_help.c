@@ -20,6 +20,7 @@ void addToken(instruction* instr_ptr, char* tok);
 void printTokens(instruction* instr_ptr);
 void clearInstruction(instruction* instr_ptr);
 void addNull(instruction* instr_ptr);
+char *GetEnv(const char* name);
 
 int main() {
 	char* token = NULL;
@@ -31,7 +32,8 @@ int main() {
 
 
 	while (1) {
-		printf("Please enter an instruction: ");
+
+		printf("%s@%s :%s>",getenv("USER"),getenv("MACHINE"),getenv("PWD"));
 
 		// loop reads character sequences separated by whitespace
 		do {
@@ -58,6 +60,12 @@ int main() {
 
 					start = i + 1;
 				}
+				if (token[i]=='$'){
+					char env[10];
+					strcpy(env, &token[1]);
+					// printf("send to function-> %s\n",env);
+					GetEnv(env);
+				}
 			}
 
 			if (start < strlen(token)) {
@@ -75,11 +83,20 @@ int main() {
 		} while ('\n' != getchar());    //until end of line is reached
 
 		addNull(&instr);
-		printTokens(&instr);
+		//printTokens(&instr);
 		clearInstruction(&instr);
 	}
 
 	return 0;
+}
+
+
+char *GetEnv(const char* name)
+{
+   printf("%s : %s\n",name,getenv(name));
+   // printf("HOME : %s\n", getenv("HOME"));
+   // printf("ROOT : %s\n", getenv("ROOT"));
+
 }
 
 //reallocates instruction array to hold another token
@@ -111,15 +128,15 @@ void addNull(instruction* instr_ptr)
 	instr_ptr->numTokens++;
 }
 
-void printTokens(instruction* instr_ptr)
-{
-	int i;
-	printf("Tokens:\n");
-	for (i = 0; i < instr_ptr->numTokens; i++) {
-		if ((instr_ptr->tokens)[i] != NULL)
-			printf("%s\n", (instr_ptr->tokens)[i]);
-	}
-}
+// void printTokens(instruction* instr_ptr)
+// {
+// 	int i;
+// 	printf("Tokens:\n");
+// 	for (i = 0; i < instr_ptr->numTokens; i++) {
+// 		if ((instr_ptr->tokens)[i] != NULL)
+// 			printf("%s\n", (instr_ptr->tokens)[i]);
+// 	}
+// }
 
 void clearInstruction(instruction* instr_ptr)
 {
