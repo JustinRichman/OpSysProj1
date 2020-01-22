@@ -30,15 +30,24 @@ int main() {
 	instr.tokens = NULL;
 	instr.numTokens = 0;
 
+	printf("Starting up terminal...\n");
 
 	while (1) {
 
-		printf("%s@%s :%s>",getenv("USER"),getenv("MACHINE"),getenv("PWD"));
+		printf("%s@%s:%s>",getenv("USER"),getenv("MACHINE"),getenv("PWD"));
 
 		// loop reads character sequences separated by whitespace
 		do {
 			//scans for next token and allocates token var to size of scanned token
 			scanf("%ms", &token);
+
+			//simple exit to help exit program for testing. ** Needs to execute built in exit from requirements
+			if (strcmp(token, "exit") == 0 || strcmp(token, "Exit") == 0 || strcmp(token, "EXIT") == 0)
+			{
+				printf("Goodbye!\nClosing Shell...\n");
+				return 0;
+			}
+
 			temp = (char*)malloc((strlen(token) + 1) * sizeof(char));
 
 			int i;
