@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 typedef struct
 {
@@ -62,10 +63,26 @@ int main() {
 				}
 				if (token[i]=='$'){
 					char env[10];
-					strcpy(env, &token[1]);
-					// printf("send to function-> %s\n",env);
-					GetEnv(env);
+					strcpy(env, &token[1]);					//copy everything after $
+					GetEnv(env);							//use getenv function to return appropriate output
 				}
+				if (token[i]=='.'&& token[i+1]=='.'){	   //cd..
+					char buffer[100];
+					chdir("..");
+					if(strlen(buffer)==1)    				 //check if you just have'/'
+					 	printf("You are at root.\n");
+					else
+						printf("New directory is: %s\n",getcwd(buffer,100));
+				}
+				if (token[i]=='.'){	   //cd.
+					char buffer[100];
+				     printf("Stayed in same directory: %s\n",getcwd(buffer,100));
+				}
+
+				if (token[i]=='~'){     //cd ~
+					GetEnv("HOME");     //directs back to home directory
+				}
+
 			}
 
 			if (start < strlen(token)) {
@@ -94,9 +111,6 @@ int main() {
 char *GetEnv(const char* name)
 {
    printf("%s : %s\n",name,getenv(name));
-   // printf("HOME : %s\n", getenv("HOME"));
-   // printf("ROOT : %s\n", getenv("ROOT"));
-
 }
 
 //reallocates instruction array to hold another token
