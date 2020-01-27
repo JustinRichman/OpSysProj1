@@ -27,7 +27,7 @@ void addNull(instruction* instr_ptr);
 char *GetEnv(const char* name);
 int setenv(const char *var_name, const char *new_value, int change_flag);
 void ChangeDirectory(char* buf);
-void ShortResolution(char* arg2);
+char* ShortResolution(char* path_str);
 
 int main() {
 	char* token = NULL;
@@ -73,6 +73,7 @@ int main() {
 			if (start < strlen(token)) {
 				memcpy(temp, token + start, strlen(token) - start);
 				temp[i-start] = '\0';
+				temp = strdup(ShortResolution(temp));
 				addToken(&instr, temp);
 			}
 
@@ -104,12 +105,6 @@ int main() {
 			// if(strcmp(instr.tokens[0], "cd") == 0) //runs cd
 			// 	ShortResolution(instr.tokens[1]);
 
-
-			// struct stat in = {0};
-			// stat(instr.tokens[0], &in);
-			// //printf("%i\n", S_ISREG(s.st_mode));
-			// int ret = S_ISREG(s.st_mode);
-			// return ret;
 
 		if((strcmp(instr.tokens[0], "cd")) != 0 && (strcmp(instr.tokens[0], "echo")) != 0 ) //Not built-ins
 			{
