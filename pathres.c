@@ -73,12 +73,15 @@ char* PathResolution(char* path_str) // . (beginning), ..(beginning), ./.. (anyw
       tmp[indexSlash] = '\0';
       strcat(tmp,edit_path_str);
       edit_path_str = strdup(tmp);
+      edit_path_str[strlen(edit_path_str)-2] = '\0';
     }
     else
     {
       tmp[indexSlash] = '\0';
       edit_path_str = strdup(tmp);
     }
+
+	}
 
   if(edit_path_str[0] == '.' && edit_path_str[1] != '.') // . at the beginning
 	{
@@ -94,6 +97,18 @@ char* PathResolution(char* path_str) // . (beginning), ..(beginning), ./.. (anyw
 		edit_path_str = strdup(tmpPWD);
 		//free(tmpPWD);
 	}
+
+  // int iterator;
+  // for(iterator = 1; iterator < strlen(edit_path_str); iterator++)     //checking for . or .. anywhere
+  // {
+  //   if(edit_path_str[iterator] == '.' && edit_path_str[iterator-1])
+  //   {
+  //     if(iterator > 2)
+  //     {
+  //
+  //     }
+  //   }
+  // }
 
 	return edit_path_str;
 }
