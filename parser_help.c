@@ -127,11 +127,27 @@ int main() {
 				}
 
 					char * path = strtok(temp_path, ":");
+					instruction check;
+					check.tokens = NULL;
+					check.numTokens = 0;
 					while(path != NULL)
 					{
+						addToken(&check, path);
 						printf("'%s'\n", path);
 						path = strtok(NULL, ":");
 
+					}
+
+					char* fileCheck;
+					for(j = 0; j < check.numTokens; j++){
+						fileCheck = check.tokens[j];
+						strcat(fileCheck, "/");
+						strcat(fileCheck, instr.tokens[0]);
+						printf("fileC: %s\n", fileCheck);
+						struct stat in = {0};
+					 	stat(fileCheck, &in);
+						if(S_ISREG(in.st_mode))
+						 	printf("YER\n");
 					}
 
 				int i;
@@ -151,8 +167,7 @@ int main() {
 				args[instr.numTokens] = (char *)malloc(10 * sizeof(char));
 				args[instr.numTokens] = NULL;
 
-				struct stat in = {0};
-				stat(instr.tokens[0], &in);
+
 
 			//	if(S_ISREG(in.st_mode))	{
 				//	printf("In if ISREG\n" );
