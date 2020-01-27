@@ -68,12 +68,6 @@ int main() {
 
 					start = i + 1;
 				}
-				// if (token[i]=='$'){
-				// 	char env[10];
-				// 	strcpy(env, &token[1]);					//copy everything after $
-				// 	GetEnv(env);							//use getenv function to return appropriate output
-				// }
-
 			}
 
 			if (start < strlen(token)) {
@@ -107,9 +101,8 @@ int main() {
 			}
 			printf("\n");
 		}
-		if(strcmp(instr.tokens[0], "cd") == 0) //runs cd
-			ShortResolution(instr.tokens[1]);
-
+			// if(strcmp(instr.tokens[0], "cd") == 0) //runs cd
+			// 	ShortResolution(instr.tokens[1]);
 
 
 			// struct stat in = {0};
@@ -120,11 +113,29 @@ int main() {
 
 		if((strcmp(instr.tokens[0], "cd")) != 0 && (strcmp(instr.tokens[0], "echo")) != 0 ) //Not built-ins
 			{
-				//Need to do path checking
+				char* temp_path;
+				int counter=0;
+
+				temp_path=getenv("PATH");
+				printf("This is my $PATH= %s\n",temp_path);
+
+				int j,k;
+				for(j;j<strlen(temp_path);j++)
+				{
+					if(temp_path[j]==':')
+						counter++;
+				}
+
+					char * path = strtok(temp_path, ":");
+					while(path != NULL)
+					{
+						printf("'%s'\n", path);
+						path = strtok(NULL, ":");
+
+					}
 
 				int i;
 				char bin[] = "/bin/";
-				printf("Before for\n");
 				args = (char**) malloc(sizeof(char*));
 				strcat(bin,instr.tokens[0]);
 				args[0] = (char *)malloc((strlen(bin)+1) * sizeof(char));
@@ -134,16 +145,12 @@ int main() {
 				for(i = 1; i < instr.numTokens; i++){
 					args = (char**) realloc(args, (i+1) * sizeof(char*));
 					args[i] = (char *)malloc((strlen(instr.tokens[i])+1) * sizeof(char));
-					printf("After malloc\n" );
 					strcpy(args[i], instr.tokens[i]);
 				}
-				printf("b4 realloc 2\n" );
 				args = (char**) realloc(args, (instr.numTokens+1) * sizeof(char*));
 				args[instr.numTokens] = (char *)malloc(10 * sizeof(char));
 				args[instr.numTokens] = NULL;
-				printf("after realloc2\n" );
 
-				printf("After for %s, %s\n", args[0], args[1]);
 				struct stat in = {0};
 				stat(instr.tokens[0], &in);
 
@@ -187,89 +194,89 @@ int main() {
 	return 0;
 }
 
-void ShortResolution( char* arg2)
-{
-	if(strcmp(arg2, "..") == 0)			//checks if second token is '..'
-	{
-		char buffer[100];
-		getcwd(buffer,100);
-		chdir("..");
+// void ShortResolution( char* arg2)
+// {
+// 	if(strcmp(arg2, "..") == 0)			//checks if second token is '..'
+// 	{
+// 		char buffer[100];
+// 		getcwd(buffer,100);
+// 		chdir("..");
 
-		   if(strlen(buffer)==1)    				 //check if you just have'/'
-			 printf("You are at root.\n");
-			else
-			{
-				 getcwd(buffer,100);
-				 ChangeDirectory(buffer);
-			}
-	}
+// 		   if(strlen(buffer)==1)    				 //check if you just have'/'
+// 			 printf("You are at root.\n");
+// 			else
+// 			{
+// 				 getcwd(buffer,100);
+// 				 ChangeDirectory(buffer);
+// 			}
+// 	}
 
-	else if(strcmp(arg2 ,".") == 0)		//checks if second token is '.'
-	{
-		char buffer[100];
-		getcwd(buffer,100);							//just stay at the same directory
-	}
+// 	else if(strcmp(arg2 ,".") == 0)		//checks if second token is '.'
+// 	{
+// 		char buffer[100];
+// 		getcwd(buffer,100);							//just stay at the same directory
+// 	}
 
-	else if(strcmp(arg2 ,"~") == 0)		//checks if second token is '~'
-		ChangeDirectory(getenv("HOME"));			//go back to HOME
-
-
-	else if(strcmp(arg2 ,"/") == 0)		//checks if second token is '\'
-		ChangeDirectory("/");			//goes back to root
+// 	else if(strcmp(arg2 ,"~") == 0)		//checks if second token is '~'
+// 		ChangeDirectory(getenv("HOME"));			//go back to HOME
 
 
-	// else if(strcmp(instr.tokens[1] ,NULL) == 0)  //THERE IS NO SECOND ARGUMENT
-	// {
-	// 	printf("No second arg\n");
-	// }
-	else
-	{												//checks if path in second token is valid
-		char buffer[100];
-		strcpy(buffer,arg2);
+// 	else if(strcmp(arg2 ,"/") == 0)		//checks if second token is '\'
+// 		ChangeDirectory("/");			//goes back to root
 
-		if (arg2[0]=='\\')				//takes the \pathname format
-		{
-			char newpath[100];
-			strcpy(newpath,arg2);
-			int i,len=strlen(newpath);				//removes the '\' before the path name
 
-				for(i=1;i<len;i++)
-					newpath[i-1]=newpath[i];
+// 	// else if(strcmp(instr.tokens[1] ,NULL) == 0)  //THERE IS NO SECOND ARGUMENT
+// 	// {
+// 	// 	printf("No second arg\n");
+// 	// }
+// 	else
+// 	{												//checks if path in second token is valid
+// 		char buffer[100];
+// 		strcpy(buffer,arg2);
 
-			newpath[i-1]='\0';
+// 		if (arg2[0]=='\\')				//takes the \pathname format
+// 		{
+// 			char newpath[100];
+// 			strcpy(newpath,arg2);
+// 			int i,len=strlen(newpath);				//removes the '\' before the path name
 
-				if(chdir(newpath)!=0)
-					printf("No such file or directory.\n");
+// 				for(i=1;i<len;i++)
+// 					newpath[i-1]=newpath[i];
 
-				else
-				{
-					 getcwd(buffer,100);
-					 ChangeDirectory(buffer);
-				}
-		}
+// 			newpath[i-1]='\0';
 
-		else                                          //checks if second token is a regular directory name without '\'
-		{
-			if(chdir(buffer)!=0)
-				printf("No such file or directory.\n");
+// 				if(chdir(newpath)!=0)
+// 					printf("No such file or directory.\n");
 
-			else
-			{
-				 getcwd(buffer,100);
-				 ChangeDirectory(buffer);
-			}
-		}
-	}
-}
-void ChangeDirectory(char* buf)
-{
-	//printf("Passing %s to function\n",buf );
-	int ret=chdir(buf);
-	if(ret==0)
-		setenv("PWD",buf,1);			//change PWD to CWD
-	else
-		printf("No working directory\n");
-}
+// 				else
+// 				{
+// 					 getcwd(buffer,100);
+// 					 ChangeDirectory(buffer);
+// 				}
+// 		}
+
+// 		else                                          //checks if second token is a regular directory name without '\'
+// 		{
+// 			if(chdir(buffer)!=0)
+// 				printf("No such file or directory.\n");
+
+// 			else
+// 			{
+// 				 getcwd(buffer,100);
+// 				 ChangeDirectory(buffer);
+// 			}
+// 		}
+// 	}
+// }
+// void ChangeDirectory(char* buf)
+// {
+// 	//printf("Passing %s to function\n",buf );
+// 	int ret=chdir(buf);
+// 	if(ret==0)
+// 		setenv("PWD",buf,1);			//change PWD to CWD
+// 	else
+// 		printf("No working directory\n");
+// }
 
 char *GetEnv(const char* name)
 {
