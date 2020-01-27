@@ -39,6 +39,10 @@ int main() {
 
 	char **args; //for execution
 
+	instruction check;
+	check.tokens = NULL;
+	check.numTokens = 0;
+
 
 	while (1) {
 
@@ -108,50 +112,34 @@ int main() {
 
 		if((strcmp(instr.tokens[0], "cd")) != 0 && (strcmp(instr.tokens[0], "echo")) != 0 ) //Not built-ins
 			{
-				char* temp_path;
-				int counter=0;
+				char *temp_path= strdup(getenv("PATH"));
 
-				temp_path=getenv("PATH");
-				printf("This is my $PATH= %s\n",temp_path);
-
-				int j,k;
-				for(j;j<strlen(temp_path);j++)
-				{
-					if(temp_path[j]==':')
-						counter++;
-				}
+				int j;
 
 					char * path = strtok(temp_path, ":");
-					instruction check;
-					check.tokens = NULL;
-					check.numTokens = 0;
 					while(path != NULL)
 					{
 						addToken(&check, path);
-						printf("'%s'\n", path);
 						path = strtok(NULL, ":");
-
 					}
+
 
 					char* fileCheck;
 					for(j = 0; j < check.numTokens; j++){
 						fileCheck = check.tokens[j];
 						strcat(fileCheck, "/");
 						strcat(fileCheck, instr.tokens[0]);
-						printf("fileC: %s\n", fileCheck);
 						struct stat in = {0};
 					 	stat(fileCheck, &in);
-						if(S_ISREG(in.st_mode))
-						 	printf("YER\n");
+						if(S_ISREG(in.st_mode)){
+						 	j = check.numTokens+1;
+						}
 					}
 
 				int i;
-				char bin[] = "/bin/";
 				args = (char**) malloc(sizeof(char*));
-				strcat(bin,instr.tokens[0]);
-				args[0] = (char *)malloc((strlen(bin)+1) * sizeof(char));
-				strcpy(args[0], bin);
-				//args[0] = bin;
+				args[0] = (char *)malloc((strlen(fileCheck)+1) * sizeof(char));
+				strcpy(args[0], fileCheck);
 
 				for(i = 1; i < instr.numTokens; i++){
 					args = (char**) realloc(args, (i+1) * sizeof(char*));
@@ -161,7 +149,6 @@ int main() {
 				args = (char**) realloc(args, (instr.numTokens+1) * sizeof(char*));
 				args[instr.numTokens] = (char *)malloc(10 * sizeof(char));
 				args[instr.numTokens] = NULL;
-
 
 
 			//	if(S_ISREG(in.st_mode))	{
@@ -176,7 +163,6 @@ int main() {
 					}
 					else if(pid == 0)
 					{
-						//char* args[] = {"/bin/head", "parser_help.c", NULL};
 						execv(args[0], args);
 					}
 					else{
@@ -185,16 +171,15 @@ int main() {
 
 				//}
 
-			//	 char* args[] = {"/bin/ls", NULL};
-			//	 execv("/bin/ls", args);
 			for (i = 0; i < instr.numTokens+1; i++){
 				free(args[i]);
 			}
 			free(args);
 			args = NULL;
-			printf("after clear\n" );
-			}
 
+			addNull(&check);
+			clearInstruction(&check);
+			}
 
 		addNull(&instr);
 	//	printTokens(&instr);
