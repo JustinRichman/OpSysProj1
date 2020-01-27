@@ -10,6 +10,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 typedef struct
 {
@@ -33,6 +36,8 @@ int main() {
 	instruction instr;
 	instr.tokens = NULL;
 	instr.numTokens = 0;
+
+	char **args; //for execution
 
 
 	while (1) {
@@ -102,9 +107,76 @@ int main() {
 			}
 			printf("\n");
 		}
-
 		if(strcmp(instr.tokens[0], "cd") == 0) //runs cd
 			ShortResolution(instr.tokens[1]);
+
+
+
+			// struct stat in = {0};
+			// stat(instr.tokens[0], &in);
+			// //printf("%i\n", S_ISREG(s.st_mode));
+			// int ret = S_ISREG(s.st_mode);
+			// return ret;
+
+		if((strcmp(instr.tokens[0], "cd")) != 0 && (strcmp(instr.tokens[0], "echo")) != 0 ) //Not built-ins
+			{
+				//Need to do path checking
+
+				int i;
+				char bin[] = "/bin/";
+				printf("Before for\n");
+				args = (char**) malloc(sizeof(char*));
+				strcat(bin,instr.tokens[0]);
+				args[0] = (char *)malloc((strlen(bin)+1) * sizeof(char));
+				strcpy(args[0], bin);
+				//args[0] = bin;
+
+				for(i = 1; i < instr.numTokens; i++){
+					args = (char**) realloc(args, (i+1) * sizeof(char*));
+					args[i] = (char *)malloc((strlen(instr.tokens[i])+1) * sizeof(char));
+					printf("After malloc\n" );
+					strcpy(args[i], instr.tokens[i]);
+				}
+				printf("b4 realloc 2\n" );
+				args = (char**) realloc(args, (instr.numTokens+1) * sizeof(char*));
+				args[instr.numTokens] = (char *)malloc(10 * sizeof(char));
+				args[instr.numTokens] = NULL;
+				printf("after realloc2\n" );
+
+				printf("After for %s, %s\n", args[0], args[1]);
+				struct stat in = {0};
+				stat(instr.tokens[0], &in);
+
+			//	if(S_ISREG(in.st_mode))	{
+				//	printf("In if ISREG\n" );
+					int status;
+					pid_t pid = fork();
+
+					if(pid == -1)
+					{
+						printf("Error -1\n");
+						exit(1);
+					}
+					else if(pid == 0)
+					{
+						//char* args[] = {"/bin/head", "parser_help.c", NULL};
+						execv(args[0], args);
+					}
+					else{
+						waitpid(pid, &status, 0);
+					}
+
+				//}
+
+			//	 char* args[] = {"/bin/ls", NULL};
+			//	 execv("/bin/ls", args);
+			for (i = 0; i < instr.numTokens+1; i++){
+				free(args[i]);
+			}
+			free(args);
+			args = NULL;
+			printf("after clear\n" );
+			}
 
 
 		addNull(&instr);
