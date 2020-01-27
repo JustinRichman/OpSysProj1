@@ -186,6 +186,7 @@ int main() {
 			}
 
 
+
 		addNull(&instr);
 	//	printTokens(&instr);
 		clearInstruction(&instr);
