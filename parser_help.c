@@ -27,7 +27,7 @@ void addNull(instruction* instr_ptr);
 char *GetEnv(const char* name);
 int setenv(const char *var_name, const char *new_value, int change_flag);
 void ChangeDirectory(char* buf);
-void ShortResolution( char* arg2);
+void ShortResolution(char* arg2);
 
 int main() {
 	char* token = NULL;
@@ -209,14 +209,121 @@ int main() {
 	return 0;
 }
 
-// void ShortResolution( char* arg2)
-// {
+char* ShortResolution(char* path_str)
+{
+	if(strlen(path_str) == 1) // is '/' and is root
+	{
+    if(strcmp(path_str, "/") == 0)
+		  return path_str;
+	}
+
+	char* edit_path_str = strdup(path_str);
+
+	if(edit_path_str[0] == '~')
+	{
+		char tmpHome[256];
+		strcpy(tmpHome,getenv("HOME"));
+		int i;
+		for(i = 0; i < strlen(edit_path_str) - 1; i++)
+		{
+			edit_path_str[i] = edit_path_str[i+1];
+		}
+		edit_path_str[strlen(edit_path_str)-1] = '\0';
+		strcat(tmpHome,edit_path_str);
+		edit_path_str = strdup(tmpHome);
+		//free(tmpHome);
+	}
+
+	if(edit_path_str[1] == '.' && edit_path_str[0] == '.') // .. at beginning
+	{
+    char tmp[256];
+		strcpy(tmp,getenv("PWD")); // /home/majors/gurley/cop4610/proj1
+		int i = strlen(tmp) -1;
+    int indexSlash;
+    for(i; i > -1; i--)
+    {
+      if(tmp[i] == '/')
+      {
+        indexSlash = i;
+        break;
+      }
+    }
+    if(strlen(edit_path_str) > 3)
+    {
+      int j;
+      for(j = 0; j < strlen(edit_path_str) - 2; j++)
+      {
+        edit_path_str[j] = edit_path_str[j+2];
+      }
+      tmp[indexSlash] = '\0';
+      strcat(tmp,edit_path_str);
+      edit_path_str = strdup(tmp);
+      edit_path_str[strlen(edit_path_str)-2] = '\0';
+    }
+    else
+    {
+      tmp[indexSlash] = '\0';
+      edit_path_str = strdup(tmp);
+    }
+
+	}
+
+  if(edit_path_str[0] == '.' && edit_path_str[1] != '.') // . at the beginning
+	{
+		char tmpPWD[256];
+		strcpy(tmpPWD,getenv("PWD"));
+		int i;
+		for(i = 0; i < strlen(edit_path_str) - 1; i++)
+		{
+			edit_path_str[i] = edit_path_str[i+1];
+		}
+		edit_path_str[strlen(edit_path_str)-1] = '\0';
+		strcat(tmpPWD,edit_path_str);
+		edit_path_str = strdup(tmpPWD);
+		//free(tmpPWD);
+	}
+
+  int iterator;
+  for(iterator = 1; iterator < strlen(edit_path_str); iterator++)     //checking for . or .. anywhere     ex: ~/
+  {
+    if(edit_path_str[iterator] == '.' && edit_path_str[iterator-1] == '.')
+    {
+      int tmpDist;
+      int endslash = iterator - 2;
+      int q = endslash - 1;
+      for(q; q < 1000000; q--)
+      {
+        if(edit_path_str[q] == '/')
+        {
+          tmpDist = endslash - q + 3;
+          int i;
+          for(i = q; i ; i++)
+          {
+            edit_path_str[i] = edit_path_str[i+tmpDist];
+            if(edit_path_str[i+tmpDist+1] == '\0')
+            {
+              edit_path_str[i+1] = '\0';
+              break;
+            }
+          }
+          break;
+        }
+      }
+    }
+  }
+
+	return edit_path_str;
+}
+
+//---------------------------------------------------------------------------
+//Extra If needed for backtaking (aka ignore)
+
 // 	if(strcmp(arg2, "..") == 0)			//checks if second token is '..'
 // 	{
 // 		char buffer[100];
 // 		getcwd(buffer,100);
 // 		chdir("..");
-
+//
 // 		   if(strlen(buffer)==1)    				 //check if you just have'/'
 // 			 printf("You are at root.\n");
 // 			else
@@ -225,21 +332,21 @@ int main() {
 // 				 ChangeDirectory(buffer);
 // 			}
 // 	}
-
+//
 // 	else if(strcmp(arg2 ,".") == 0)		//checks if second token is '.'
 // 	{
 // 		char buffer[100];
 // 		getcwd(buffer,100);							//just stay at the same directory
 // 	}
-
+//
 // 	else if(strcmp(arg2 ,"~") == 0)		//checks if second token is '~'
 // 		ChangeDirectory(getenv("HOME"));			//go back to HOME
-
-
+//
+//
 // 	else if(strcmp(arg2 ,"/") == 0)		//checks if second token is '\'
 // 		ChangeDirectory("/");			//goes back to root
-
-
+//
+//
 // 	// else if(strcmp(instr.tokens[1] ,NULL) == 0)  //THERE IS NO SECOND ARGUMENT
 // 	// {
 // 	// 	printf("No second arg\n");
@@ -248,33 +355,33 @@ int main() {
 // 	{												//checks if path in second token is valid
 // 		char buffer[100];
 // 		strcpy(buffer,arg2);
-
+//
 // 		if (arg2[0]=='\\')				//takes the \pathname format
 // 		{
 // 			char newpath[100];
 // 			strcpy(newpath,arg2);
 // 			int i,len=strlen(newpath);				//removes the '\' before the path name
-
+//
 // 				for(i=1;i<len;i++)
 // 					newpath[i-1]=newpath[i];
-
+//
 // 			newpath[i-1]='\0';
-
+//
 // 				if(chdir(newpath)!=0)
 // 					printf("No such file or directory.\n");
-
+//
 // 				else
 // 				{
 // 					 getcwd(buffer,100);
 // 					 ChangeDirectory(buffer);
 // 				}
 // 		}
-
+//
 // 		else                                          //checks if second token is a regular directory name without '\'
 // 		{
 // 			if(chdir(buffer)!=0)
 // 				printf("No such file or directory.\n");
-
+//
 // 			else
 // 			{
 // 				 getcwd(buffer,100);
@@ -292,6 +399,8 @@ int main() {
 // 	else
 // 		printf("No working directory\n");
 // }
+//------------------------------------------------------------------------------
+
 
 char *GetEnv(const char* name)
 {

@@ -98,17 +98,34 @@ char* PathResolution(char* path_str) // . (beginning), ..(beginning), ./.. (anyw
 		//free(tmpPWD);
 	}
 
-  // int iterator;
-  // for(iterator = 1; iterator < strlen(edit_path_str); iterator++)     //checking for . or .. anywhere
-  // {
-  //   if(edit_path_str[iterator] == '.' && edit_path_str[iterator-1])
-  //   {
-  //     if(iterator > 2)
-  //     {
-  //
-  //     }
-  //   }
-  // }
+  int iterator;
+  for(iterator = 1; iterator < strlen(edit_path_str); iterator++)     //checking for . or .. anywhere     ex: ~/
+  {
+    if(edit_path_str[iterator] == '.' && edit_path_str[iterator-1] == '.')
+    {
+      int tmpDist;
+      int endslash = iterator - 2;
+      int q = endslash - 1;
+      for(q; q < 1000000; q--)
+      {
+        if(edit_path_str[q] == '/')
+        {
+          tmpDist = endslash - q + 3;
+          int i;
+          for(i = q; i ; i++)
+          {
+            edit_path_str[i] = edit_path_str[i+tmpDist];
+            if(edit_path_str[i+tmpDist+1] == '\0')
+            {
+              edit_path_str[i+1] = '\0';
+              break;
+            }
+          }
+          break;
+        }
+      }
+    }
+  }
 
 	return edit_path_str;
 }
