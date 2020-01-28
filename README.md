@@ -7,12 +7,15 @@ and a series of basic built in functions as specified.
 			The only file used to execute our program is:
 			1) shell.c
 
+
 		Make file description
 			To compile shell.c use the following commands:
 			-call make
 			-creates an executable called shell
 
 		Documentation of Group Member Contribution
+      To view our Commit Logs please visit our github URL: https://github.com/JustinRichman/OpSysProj1
+      
 			Group Members include : Tyler Gurley, Justin Richman, and Samantha Chaves. The work distribution is as follows:
 
 			1)Prompt
