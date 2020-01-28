@@ -108,7 +108,9 @@ int main() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		if(strcmp(instr.tokens[0],"exit") == 0)
 		{
-			printf("Exiting Shell\nCommands Executed: %d\nGoodbye!\n", numberOfCommands);
+			printf("Exiting Shell\n");
+			//waitpid(-1,...,0);			Needs implementation for background
+			printf("Commands Executed: %d\nGoodbye!\n", numberOfCommands);
 			return 0;
 		}
 		numberOfCommands++;
@@ -128,8 +130,31 @@ int main() {
 			}
 			printf("\n");
 		}
-			// if(strcmp(instr.tokens[0], "cd") == 0) //runs cd
-			// 	ShortResolution(instr.tokens[1]);
+
+		if(strcmp(instr.tokens[0], "cd") == 0) //runs cd
+	{
+		if(instr.numTokens > 2)
+		{
+			printf("cd: Too many arguments.\n");
+		}
+		else
+		{
+			if(instr.numTokens < 2)
+			{
+				chdir(getenv("HOME"));
+				setenv("PWD",getenv("HOME"),1);			//change PWD to CWD
+			}
+			else
+			{
+				int checkIfgood = chdir(ShortResolution(instr.tokens[1]));
+				if(checkIfgood == 0)
+					setenv("PWD",ShortResolution(instr.tokens[1]),1);			//change PWD to CWD
+				else
+					printf("cd: No such directory.\n");
+
+			}
+		}
+	}
 
 
 		if((strcmp(instr.tokens[0], "cd")) != 0 && (strcmp(instr.tokens[0], "echo")) != 0 ) //Not built-ins
