@@ -43,6 +43,7 @@ int main() {
 	check.tokens = NULL;
 	check.numTokens = 0;
 
+	int numberOfCommands = 0;
 
 	while (1) {
 
@@ -52,6 +53,12 @@ int main() {
 		do {
 			//scans for next token and allocates token var to size of scanned token
 			scanf("%ms", &token);
+			numberOfCommands++;
+			if(strcmp(token,"exit") == 0)
+			{
+				printf("Exiting Shell\nCommands Executed: %d\nGoodbye!", &numberOfCommands);
+				return 0;
+			}
 			temp = (char*)malloc((strlen(token) + 1) * sizeof(char));
 			int i;
 			int start = 0;
