@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 typedef struct
 {
@@ -141,20 +142,30 @@ int main() {
 				args[0] = (char *)malloc((strlen(fileCheck)+1) * sizeof(char));
 				strcpy(args[0], fileCheck);
 
+
 				for(i = 1; i < instr.numTokens; i++){
+					if ( (strcmp(instr.tokens[i], "|") == 0) ||  (strcmp(instr.tokens[i], ">") == 0) ||  (strcmp(instr.tokens[i], "<") == 0)
+					 || (strcmp(instr.tokens[i], "&") == 0)){
+						//nothing
+					} //IO???
+					else{
 					args = (char**) realloc(args, (i+1) * sizeof(char*));
 					args[i] = (char *)malloc((strlen(instr.tokens[i])+1) * sizeof(char));
 					strcpy(args[i], instr.tokens[i]);
+				}
 				}
 				args = (char**) realloc(args, (instr.numTokens+1) * sizeof(char*));
 				args[instr.numTokens] = (char *)malloc(10 * sizeof(char));
 				args[instr.numTokens] = NULL;
 
+				printf("args0: %s args1: %s\n", args[0],args[1]);
 
-			//	if(S_ISREG(in.st_mode))	{
-				//	printf("In if ISREG\n" );
 					int status;
 					pid_t pid = fork();
+
+
+					int fd = open(instr.tokens[2], O_RDWR); //IO
+					printf("fd: %d\n", fd);
 
 					if(pid == -1)
 					{
@@ -163,13 +174,16 @@ int main() {
 					}
 					else if(pid == 0)
 					{
+						close(0); //IO
+						dup(fd);	//IO
+						close(fd); //IO
 						execv(args[0], args);
 					}
 					else{
 						waitpid(pid, &status, 0);
+						close(fd); //IO
 					}
 
-				//}
 
 			for (i = 0; i < instr.numTokens+1; i++){
 				free(args[i]);
