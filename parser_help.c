@@ -45,6 +45,7 @@ int main() {
 	check.numTokens = 0;
 
 	int numberOfCommands = 0;
+	int forkFlag = 0;
 
 	while (1) {
 
@@ -70,6 +71,19 @@ int main() {
 					specialChar[0] = token[i];
 					specialChar[1] = '\0';
 
+					if(strcmp(specialChar, "|") == 0)
+					forkFlag = 1;
+					else if(strcmp(specialChar, ">") == 0 && forkFlag = 3) // cmd < fIn > fOut
+					forkFlag = 5;
+					else if(strcmp(specialChar, "<") == 0 && forkFlag = 2) // cmd > fOut < fIn
+					forkFlag = 6;
+					else if(strcmp(specialChar, ">") == 0)
+					forkFlag = 2;
+					else if(strcmp(specialChar, "<") == 0)
+					forkFlag = 3;
+					else if(strcmp(specialChar, "&") == 0)
+					forkFlag = 4;
+
 					addToken(&instr,specialChar);
 
 					start = i + 1;
@@ -92,7 +106,7 @@ int main() {
 		} while ('\n' != getchar());    //until end of line is reached
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		if(strcmp(instr.token[0],"exit") == 0)
+		if(strcmp(instr.tokens[0],"exit") == 0)
 		{
 			printf("Exiting Shell\nCommands Executed: %d\nGoodbye!\n", numberOfCommands);
 			return 0;
@@ -170,7 +184,23 @@ int main() {
 					int status;
 					pid_t pid = fork();
 
-
+					if(forkFlag == 0)
+					{
+						if(pid == -1)
+						{
+							printf("Error -1\n");
+							exit(1);
+						}
+						else if(pid == 0)
+						{
+							execv(args[0], args);
+						}
+						else{
+							waitpid(pid, &status, 0);
+							close(fd); //IO
+						}
+					}
+					else	if(forkFlag == 3){
 					int fd = open(instr.tokens[2], O_RDWR); //IO
 					printf("fd: %d\n", fd);
 
@@ -190,6 +220,7 @@ int main() {
 						waitpid(pid, &status, 0);
 						close(fd); //IO
 					}
+				}
 
 
 			for (i = 0; i < instr.numTokens+1; i++){
