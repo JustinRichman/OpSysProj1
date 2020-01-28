@@ -56,7 +56,7 @@ int main() {
 			numberOfCommands++;
 			if(strcmp(token,"exit") == 0)
 			{
-				printf("Exiting Shell\nCommands Executed: %d\nGoodbye!", &numberOfCommands);
+				printf("Exiting Shell\nCommands Executed: %d\nGoodbye!\n", numberOfCommands);
 				return 0;
 			}
 			temp = (char*)malloc((strlen(token) + 1) * sizeof(char));
