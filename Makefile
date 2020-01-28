@@ -1,2 +1,2 @@
-shell:  parser_help.c
-	gcc -o shell parser_help.c
+shell:  shell.c
+	gcc -o shell shell.c
