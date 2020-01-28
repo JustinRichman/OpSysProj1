@@ -53,12 +53,6 @@ int main() {
 		do {
 			//scans for next token and allocates token var to size of scanned token
 			scanf("%ms", &token);
-			numberOfCommands++;
-			if(strcmp(token,"exit") == 0)
-			{
-				printf("Exiting Shell\nCommands Executed: %d\nGoodbye!\n", numberOfCommands);
-				return 0;
-			}
 			temp = (char*)malloc((strlen(token) + 1) * sizeof(char));
 			int i;
 			int start = 0;
@@ -97,6 +91,12 @@ int main() {
 		} while ('\n' != getchar());    //until end of line is reached
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		if(strcmp(instr.token[0],"exit") == 0)
+		{
+			printf("Exiting Shell\nCommands Executed: %d\nGoodbye!\n", numberOfCommands);
+			return 0;
+		}
+		numberOfCommands++;
 		if(strcmp(instr.tokens[0], "echo") == 0) //runs echo
 		{
 			int i;
