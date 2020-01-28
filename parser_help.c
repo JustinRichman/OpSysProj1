@@ -131,11 +131,11 @@ int main() {
 										 forkFlag = -1;
 										 break;
 						 }
-						 else if((i==instr.numTokens-1)&&strcmp(instr.tokens[i],"|")==0){  //checks if > is the last symbol and if it stands alone
+						 else if((i==instr.numTokens-1)&&strcmp(instr.tokens[i],"|")==0){  //checks if | is last symbol
 										 printf("Invalid syntax.\n");
 										 forkFlag = -1;
 									 }
-						 else if((strcmp(instr.tokens[i],"&")==0)){  //checks if < is the last symbol and if it stands alone
+						 else if((strcmp(instr.tokens[i],"&")==0)){  //checks if & and | are next to each other
                             if(strcmp(instr.tokens[i+1],"|")==0){
                                 if(strcmp(instr.tokens[instr.numTokens-1],"&")==0)
                                     printf("Invalid syntax.\n");
@@ -144,7 +144,7 @@ int main() {
 																		forkFlag = -1;
 													  }
                     }
-            else if((strcmp(instr.tokens[i],"<")==0)||strcmp(instr.tokens[i],">")==0){  //checks if < is the last symbol and if it stands alone
+            else if((strcmp(instr.tokens[i],"<")==0)||strcmp(instr.tokens[i],">")==0){  //checks if < or > are with &
                             if(strcmp(instr.tokens[i+1],"&")==0){
                                     printf("Invalid syntax.\n");
 																		forkFlag = -1;
