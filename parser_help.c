@@ -49,6 +49,8 @@ int main() {
 
 	while (1) {
 
+		forkFlag = 0;
+
 		printf("%s@%s :%s>",getenv("USER"),getenv("MACHINE"),getenv("PWD"));
 
 		// loop reads character sequences separated by whitespace
@@ -81,8 +83,6 @@ int main() {
 					forkFlag = 2;
 					else if(strcmp(specialChar, "<") == 0)
 					forkFlag = 3;
-					else if(strcmp(specialChar, "&") == 0)
-					forkFlag = 4;
 
 					addToken(&instr,specialChar);
 
@@ -106,7 +106,58 @@ int main() {
 		} while ('\n' != getchar());    //until end of line is reached
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		if(strcmp(instr.tokens[0],"exit") == 0)
+
+		 int i;
+		 for (i = 0; i < instr.numTokens; i++) {
+				 if (instr.tokens[i] != NULL){
+						 if((i==instr.numTokens-1)&&strcmp(instr.tokens[i],"<")==0) { //checks if < is the last symbol and if it stands alone
+										 printf("Invalid syntax.\n");
+										 forkFlag = -1;
+}
+						 else if((i==instr.numTokens-1)&&strcmp(instr.tokens[i],">")==0){  //checks if > is the last symbol and if it stands alone
+										 printf("Invalid syntax.\n");
+										 forkFlag = -1;
+									 }
+
+						 else if((strcmp(instr.tokens[0],"<")==0) )  //checks if < is first and file second
+						 {
+										 printf("Invalid syntax.\n");
+										 forkFlag = -1;
+										 break;
+						 }
+						 else if((strcmp(instr.tokens[0],"|")==0) )  //checks if | is first and file second
+						 {
+										 printf("Invalid syntax.\n");
+										 forkFlag = -1;
+										 break;
+						 }
+						 else if((i==instr.numTokens-1)&&strcmp(instr.tokens[i],"|")==0){  //checks if > is the last symbol and if it stands alone
+										 printf("Invalid syntax.\n");
+										 forkFlag = -1;
+									 }
+						 else if((strcmp(instr.tokens[i],"&")==0)){  //checks if < is the last symbol and if it stands alone
+                            if(strcmp(instr.tokens[i+1],"|")==0){
+                                if(strcmp(instr.tokens[instr.numTokens-1],"&")==0)
+                                    printf("Invalid syntax.\n");
+                                else
+                                    printf("Invalid syntax.\n");
+																		forkFlag = -1;
+													  }
+                    }
+            else if((strcmp(instr.tokens[i],"<")==0)||strcmp(instr.tokens[i],">")==0){  //checks if < is the last symbol and if it stands alone
+                            if(strcmp(instr.tokens[i+1],"&")==0){
+                                    printf("Invalid syntax.\n");
+																		forkFlag = -1;
+                            }
+                    }
+
+				 }
+		 }
+
+
+
+
+		if(strcmp(instr.tokens[0],"exit") == 0 && forkFlag != -1)
 		{
 			printf("Exiting Shell\n");
 			//waitpid(-1,...,0);			Needs implementation for background
@@ -114,7 +165,7 @@ int main() {
 			return 0;
 		}
 		numberOfCommands++;
-		if(strcmp(instr.tokens[0], "echo") == 0) //runs echo
+		if(strcmp(instr.tokens[0], "echo") == 0 && forkFlag != -1) //runs echo
 		{
 			int i;
 			for(i = 1; i < instr.numTokens; i++)
@@ -131,7 +182,7 @@ int main() {
 			printf("\n");
 		}
 
-		if(strcmp(instr.tokens[0], "cd") == 0) //runs cd
+		if(strcmp(instr.tokens[0], "cd") == 0 && forkFlag != -1) //runs cd
 	{
 		if(instr.numTokens > 2)
 		{
@@ -157,7 +208,7 @@ int main() {
 	}
 
 
-		if((strcmp(instr.tokens[0], "cd")) != 0 && (strcmp(instr.tokens[0], "echo")) != 0 ) //Not built-ins
+		if((strcmp(instr.tokens[0], "cd")) != 0 && (strcmp(instr.tokens[0], "echo")) != 0 && forkFlag != -1) //Not built-ins
 			{
 				char *temp_path= strdup(getenv("PATH"));
 
@@ -171,45 +222,52 @@ int main() {
 					}
 
 
-					char* fileCheck;
+					char* fileCheck; //for pipes
+					int futureFile = -1; //for pipes
 					for(j = 0; j < check.numTokens; j++){
-						fileCheck = check.tokens[j];
+						fileCheck = strdup(check.tokens[j]);
 						strcat(fileCheck, "/");
 						strcat(fileCheck, instr.tokens[0]);
 						struct stat in = {0};
 					 	stat(fileCheck, &in);
 						if(S_ISREG(in.st_mode)){
+							futureFile = j;
 						 	j = check.numTokens+1;
 						}
 					}
 
+
 				int i;
 				args = (char**) malloc(sizeof(char*));
-				args[0] = (char *)malloc((strlen(fileCheck)+1) * sizeof(char));
+				args[0] = (char *)malloc((strlen(fileCheck)+1) * sizeof(char));		//making exev args
 				strcpy(args[0], fileCheck);
 
-
-				for(i = 1; i < instr.numTokens; i++){
-					if ( (strcmp(instr.tokens[i], "|") == 0) ||  (strcmp(instr.tokens[i], ">") == 0) ||  (strcmp(instr.tokens[i], "<") == 0)
-					 || (strcmp(instr.tokens[i], "&") == 0)){
-						//nothing
-					} //IO???
+				int checkSpec = 0;
+				int background = -1;	//for background
+				for(i = 1; i < instr.numTokens; i++){	//cont making execv args[]
+					if ( (strcmp(instr.tokens[i], "|") == 0) ||  (strcmp(instr.tokens[i], ">") == 0) ||  (strcmp(instr.tokens[i], "<") == 0)){
+						checkSpec = i;
+					}
+					else if((strcmp(instr.tokens[i], "&") == 0))
+					{
+						background = i;
+					}
 					else{
 					args = (char**) realloc(args, (i+1) * sizeof(char*));
 					args[i] = (char *)malloc((strlen(instr.tokens[i])+1) * sizeof(char));
 					strcpy(args[i], instr.tokens[i]);
 				}
 				}
+
 				args = (char**) realloc(args, (instr.numTokens+1) * sizeof(char*));
 				args[instr.numTokens] = (char *)malloc(10 * sizeof(char));
 				args[instr.numTokens] = NULL;
 
-				printf("args0: %s args1: %s\n", args[0],args[1]);
 
 					int status;
 					pid_t pid = fork();
 
-					if(forkFlag == 0)
+					if(forkFlag == 0) //No special chars
 					{
 						if(pid == -1)
 						{
@@ -221,12 +279,21 @@ int main() {
 							execv(args[0], args);
 						}
 						else{
+							//if(background == -1) //Commented out background try
 							waitpid(pid, &status, 0);
+							//else if(background > -1){
+							//waitpid(pid,&status,WNOHANG);
+
+							}
 						}
-					}
-					else	if(forkFlag == 3){
+					else	if(forkFlag == 3){	//INPUT IO
 					int fd = open(instr.tokens[2], O_RDWR);
-					printf("fd: %d\n", fd);
+
+					if(fd<0)
+					{
+						printf("File does not exist\n" );
+						exit(1);
+					}
 
 					if(pid == -1)
 					{
@@ -245,7 +312,94 @@ int main() {
 						close(fd);
 					}
 				}
+				else if(forkFlag == 2){ 	//OUTPUT IO
+					int fd = open(instr.tokens[2], O_CREAT|O_WRONLY|O_TRUNC, 0777);
 
+					if(pid == -1)
+					{
+						printf("Error -1\n");
+						exit(1);
+					}
+					else if(pid == 0)
+					{
+						close(1);
+						dup(fd);
+						close(fd);
+						execv(args[0], args);
+					}
+					else{
+						waitpid(pid, &status, 0);
+						close(fd);
+					}
+				}
+				else if(forkFlag == 1){ //PIPE
+
+
+					// // BELOW is our commented out attempt at pipe :(
+					//
+					// char *fileCheck1;
+					// fileCheck1 = strdup(check.tokens[futureFile]);
+					// strcat(fileCheck1, "/");
+					// char *move = strdup(args[checkSpec+1]);
+					// strcat(fileCheck1, move);
+					//
+					//
+					// char **args1;
+					// args1 = (char**) malloc(sizeof(char*));
+					// args1[0] = (char *)malloc((strlen(fileCheck1)+1) * sizeof(char));
+					// //strcpy(args1[0], fileCheck1);
+					// args1[0] = strdup(fileCheck1);
+					//
+					//
+					// int n = 1;
+					// for(i = checkSpec+2; i < instr.numTokens; i++){
+					// 	args1 = (char**) realloc(args1, (n+1) * sizeof(char*));
+					// 	args1[i] = (char *)malloc((strlen(instr.tokens[i])+1) * sizeof(char));
+					// args1[n] = strdup(instr.tokens[i]);
+					// 	n++;
+					// }
+					//
+					//
+					// int fd[2];
+					// pipe(fd);
+					// fd[0] = 3;
+					// fd[1] = 4;
+					//
+					//
+					// int status1;
+					// pid_t pid1 = fork();
+					//
+					// if(pid == -1)
+					// {
+					// 	printf("Error -1\n");
+					// 	exit(1);
+					// }
+					// else if(pid == 0)
+					// {
+					// 	close(1);
+					// 	dup(fd[1]);
+					// 	close(fd[0]);
+					// 	close(fd[1]);
+					// 	execv(args[0], args);
+					//
+					// 	if(fork() == 0){
+					// 		close(0);
+					// 		dup(fd[0]);
+					// 		close(fd[0]);
+					// 		close(fd[1]);
+					// 		execv(args[0], args);
+					// 	}
+					// 	else{
+					// 		waitpid(pid, &status, 0);
+					// 	}
+					// }
+					// else{
+					// 	waitpid(pid, &status, 0);
+					// 	close(fd[0]);
+					// 	close(fd[1]);
+					// }
+
+				}
 
 			for (i = 0; i < instr.numTokens+1; i++){
 				free(args[i]);
@@ -371,93 +525,6 @@ char* ShortResolution(char* path_str)
 
 	return edit_path_str;
 }
-
-//---------------------------------------------------------------------------
-//Extra If needed for backtaking (aka ignore)
-
-// 	if(strcmp(arg2, "..") == 0)			//checks if second token is '..'
-// 	{
-// 		char buffer[100];
-// 		getcwd(buffer,100);
-// 		chdir("..");
-//
-// 		   if(strlen(buffer)==1)    				 //check if you just have'/'
-// 			 printf("You are at root.\n");
-// 			else
-// 			{
-// 				 getcwd(buffer,100);
-// 				 ChangeDirectory(buffer);
-// 			}
-// 	}
-//
-// 	else if(strcmp(arg2 ,".") == 0)		//checks if second token is '.'
-// 	{
-// 		char buffer[100];
-// 		getcwd(buffer,100);							//just stay at the same directory
-// 	}
-//
-// 	else if(strcmp(arg2 ,"~") == 0)		//checks if second token is '~'
-// 		ChangeDirectory(getenv("HOME"));			//go back to HOME
-//
-//
-// 	else if(strcmp(arg2 ,"/") == 0)		//checks if second token is '\'
-// 		ChangeDirectory("/");			//goes back to root
-//
-//
-// 	// else if(strcmp(instr.tokens[1] ,NULL) == 0)  //THERE IS NO SECOND ARGUMENT
-// 	// {
-// 	// 	printf("No second arg\n");
-// 	// }
-// 	else
-// 	{												//checks if path in second token is valid
-// 		char buffer[100];
-// 		strcpy(buffer,arg2);
-//
-// 		if (arg2[0]=='\\')				//takes the \pathname format
-// 		{
-// 			char newpath[100];
-// 			strcpy(newpath,arg2);
-// 			int i,len=strlen(newpath);				//removes the '\' before the path name
-//
-// 				for(i=1;i<len;i++)
-// 					newpath[i-1]=newpath[i];
-//
-// 			newpath[i-1]='\0';
-//
-// 				if(chdir(newpath)!=0)
-// 					printf("No such file or directory.\n");
-//
-// 				else
-// 				{
-// 					 getcwd(buffer,100);
-// 					 ChangeDirectory(buffer);
-// 				}
-// 		}
-//
-// 		else                                          //checks if second token is a regular directory name without '\'
-// 		{
-// 			if(chdir(buffer)!=0)
-// 				printf("No such file or directory.\n");
-//
-// 			else
-// 			{
-// 				 getcwd(buffer,100);
-// 				 ChangeDirectory(buffer);
-// 			}
-// 		}
-// 	}
-// }
-// void ChangeDirectory(char* buf)
-// {
-// 	//printf("Passing %s to function\n",buf );
-// 	int ret=chdir(buf);
-// 	if(ret==0)
-// 		setenv("PWD",buf,1);			//change PWD to CWD
-// 	else
-// 		printf("No working directory\n");
-// }
-//------------------------------------------------------------------------------
-
 
 char *GetEnv(const char* name)
 {
