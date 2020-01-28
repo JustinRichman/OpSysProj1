@@ -73,9 +73,9 @@ int main() {
 
 					if(strcmp(specialChar, "|") == 0)
 					forkFlag = 1;
-					else if(strcmp(specialChar, ">") == 0 && forkFlag = 3) // cmd < fIn > fOut
+					else if(strcmp(specialChar, ">") == 0 && forkFlag == 3) // cmd < fIn > fOut
 					forkFlag = 5;
-					else if(strcmp(specialChar, "<") == 0 && forkFlag = 2) // cmd > fOut < fIn
+					else if(strcmp(specialChar, "<") == 0 && forkFlag == 2) // cmd > fOut < fIn
 					forkFlag = 6;
 					else if(strcmp(specialChar, ">") == 0)
 					forkFlag = 2;
@@ -222,11 +222,10 @@ int main() {
 						}
 						else{
 							waitpid(pid, &status, 0);
-							close(fd); //IO
 						}
 					}
 					else	if(forkFlag == 3){
-					int fd = open(instr.tokens[2], O_RDWR); //IO
+					int fd = open(instr.tokens[2], O_RDWR);
 					printf("fd: %d\n", fd);
 
 					if(pid == -1)
@@ -236,14 +235,14 @@ int main() {
 					}
 					else if(pid == 0)
 					{
-						close(0); //IO
-						dup(fd);	//IO
-						close(fd); //IO
+						close(0);
+						dup(fd);
+						close(fd);
 						execv(args[0], args);
 					}
 					else{
 						waitpid(pid, &status, 0);
-						close(fd); //IO
+						close(fd);
 					}
 				}
 
