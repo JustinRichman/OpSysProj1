@@ -15,7 +15,7 @@ and a series of basic built in functions as specified.
 
 		Documentation of Group Member Contribution
       To view our Commit Logs please visit our github URL: https://github.com/JustinRichman/OpSysProj1
-      
+
 			Group Members include : Tyler Gurley, Justin Richman, and Samantha Chaves. The work distribution is as follows:
 
 			1)Prompt
@@ -49,3 +49,5 @@ and a series of basic built in functions as specified.
 			It should also be noted that shell.c does not check for both input and output redirection within one command (e.g CMD < FILE_IN > FILE_OUT vice versa). We did however, complete the error checking for invalid syntax.
 
 			For background processing we only completed the error checking for invalid syntax.
+
+			For ShortResolution, relative paths (ie cd proj1 -> cd $PWD/proj1) does not work. This is the only known issue for this.

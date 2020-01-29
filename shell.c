@@ -420,7 +420,7 @@ int main() {
 	return 0;
 }
 
-char* ShortResolution(char* path_str)
+char* ShortResolution(char* path_str)						// I know you said to replace all strdups with malloc but i had troubles freeing the pointers.
 {
 	if(strlen(path_str) == 1) // is '/' and is root
 	{
@@ -522,6 +522,16 @@ char* ShortResolution(char* path_str)
       }
     }
   }
+//    *** This breaks the shell if uncommented but should do path res if somehting like cd proj1 -> cd $PWD/proj1
+	// if(edit_path_str[0] != '/')
+  // {
+  //   char* frontPWD = (char*)malloc((strlen(getenv("PWD")) + strlen(edit_path_str) +2) * sizeof(char));
+	// 	strcpy(frontPWD, getenv("PWD"));
+	// 	strcat(frontPWD, "/");
+	// 	strcat(frontPWD, edit_path_str);
+	// 	edit_path_str = frontPWD;
+	// 	free(frontPWD);
+  // }
 
 	return edit_path_str;
 }
